@@ -256,13 +256,22 @@ function all(){
  
 }
 
+function getLocal(){
+  cart = JSON.parse(localStorage.getItem("cart")) || []
+}
+
+let total_price = cart.reduce(( sum, ele) => ele.price*ele.count + sum, 0)
+
 function setLocal(c){
   localStorage.setItem("cart", JSON.stringify(c))
+  total_price = cart.reduce(( sum, ele) => ele.price*ele.count + sum, 0)
+  getLocal()
   showCart()
 }
 
 function handleCart(id){
   let item = data.find((el) => el.id == id )
+  item.count = 1;
   cart.push(item)
   setLocal(cart)
 
@@ -271,8 +280,47 @@ function handleCart(id){
 function deleteCart(id){
   let item = cart.filter((el) => el.id != id )
   setLocal(item)
-  location.reload()
 }
+
+ 
+let val;
+function addOffer(){
+    total_price =  cart.reduce(( sum, ele) => ele.price*ele.count +sum, 0)
+    let code = document.getElementById("code");
+if(code.value == "30"){
+ //  percentage = 400/500 * 100
+   val = 30*total_price/100
+   console.log()
+   total_price = total_price-val
+   showCart()
+}
+}
+
+
+function handleIncCount(id){
+  let newCart = cart.find((ele) => ele.id == id)
+  newCart.count++;
+
+ cart.map((ele) => {
+   if(ele.id==id){
+     ele = newCart
+   }
+ })
+ setLocal(cart)
+}
+
+function handleDecCount(id){
+ let newCart = cart.find((ele) => ele.id == id)
+ newCart.count--;
+
+ cart.map((ele) => {
+   if(ele.id==id){
+     ele = newCart
+   }
+ })
+ setLocal(cart)
+}
+
 
 function electronics(){
     let newData = data.filter((ele) => ele.category == "electronics")
@@ -332,8 +380,8 @@ showRow(newData)
 
 function handleItem(id){
   let newItem = data.find((ele) => ele.id==id)
-
   const {image, title, category, price, rating, description} = newItem
+
 
   itembody.innerHTML = `
       <div class="card h-100 border-0 p-3">
@@ -398,50 +446,65 @@ showRow(data)
 function showCart(){
   cartBody.innerHTML="";
   cart.map((el)=>{
-    cartBody.innerHTML += `
-       <div class="col-12">
-                <div class="card h-100">
-                  <div class="row justify-content-center align-items-center">
-                    <div class="col-4">
-                       <img src=${el.image} height="100px" class="card-img-top" alt="...">
-                    </div>
-                    <div class="col-8">
-                      <div class="card-body  p-1">
-                        <h4 class="card-text mb-2">${el.category}</h4>
-                        <h6 class="card-title">${el.title}</h6> 
-                           
-                        <div class="d-flex pb-2  justify-content-between">
-                          <span class="badge text-bg-light">$ ${el.price}</span>
-                          <span class="badge text-bg-light">⭐ ${el.rating.rate}</span>
-                        </div>
-                        <a onclick="deleteCart(${el.id})" class="btn btn-danger btn-sm"><i class="ri-delete-bin-2-fill"></i></a>
-                        <a onclick="handleItem(${el.id})" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn  btn-secondary btn-sm">More</a>
-                      </div>
-                      </div>
-                    </div>
-                  </div>
-                  </div>
+  cartBody.innerHTML += `
+    <div class="col-12">
+      <div class="card h-100 position-relative p-1">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-4">
+                <img src=${el.image} height="100px" class="card-img-top" alt="...">
             </div>
+            <div class="col-8">
+                  <h4 class="card-text mb-2">${el.category}</h4>
+                  <h6 class="card-title">${el.title}</h6> 
+                  <div class="d-flex pb-2  justify-content-between">
+                      <span class="badge text-bg-light">$ ${el.price}</span>
+                      <span class="badge text-bg-light">⭐ ${el.rating.rate}</span>
+                  </div>
+                        <a onclick="deleteCart(${el.id})" class="btn btn-outline-danger btn-sm position-absolute " style="right:5px; top:5px">
+                          <i class="ri-delete-bin-2-fill"></i>
+                        </a>
+                  <div class="d-flex justify-content-between">
+                          <a onclick="handleItem(${el.id})" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-warning btn-sm">More</a>
+                          <div class="btn-group ">
+                              <button onclick="handleDecCount(${el.id})" class="btn btn-secondary btn-sm">-</button>
+                              <button class="btn btn-light btn-sm" disabled>${el.count}</button>
+                              <button onclick="handleIncCount(${el.id})" class="btn btn-secondary btn-sm">+</button>
+                          </div>
+                  </div>
+            </div> 
+        </div>
+      </div>
+    </div>
     `
-  })
-  total.innerHTML = ` 
-  <div class="container bg-light text-dark rounded-2">
+})
+
+total.innerHTML = ""
+total.innerHTML = ` 
+      <div class="container bg-light text-dark rounded-2">
             <div class="row g-2">
-              <div class="col-4 p-3">
-                <b>item No:</b>
+              <div class="col-6 p-3">
+                <b>Offer :</b>
+                <div class="d-flex">
+                     <input class="form-control form-control-sm" id="code" />
+                     <button onclick="addOffer()" class="btn btn-outline-dark btn-sm">Apply</button>
+                </div>
+              </div>
+              <div class="col-3 p-3">
+                <b>item :</b>
                 <span class="badge px-3 py-2 text-bg-dark"> ${cart.length} </span>
               </div>
-              <div class="col-4 p-3">
-                <b>Offer:</b>
-              </div>
-              <div class="col-4 p-3 text-center">
+              <div class="col-3 p-3 text-center">
                 <b>Total :</b>
-                <span class="badge px-3 py-2 text-bg-dark">${cart.reduce(( sum, ele) => ele.price +sum, 0)}</span>
+                <span class="badge px-3 py-2 text-bg-dark">${Math.round(total_price)}</span>
               </div>
+              <div class="row m-2 p-2">
+                  ${
+                    val ? ` <span class=" border border-dark rounded-2 p-2 text-center">
+                    you save ${val} on this order  </span>` : ``
+                  }
             </div>
-        </div>
+      </div>
   `
-
  }
 
  showCart()
