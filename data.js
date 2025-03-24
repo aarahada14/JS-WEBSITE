@@ -242,7 +242,7 @@ let data =[
     }
   ]
 
-
+let login = JSON.parse(sessionStorage.getItem("login"))
 let cart = JSON.parse(localStorage.getItem("cart")) || []
 let row = document.getElementById("row")
 let cartBody = document.getElementById("cart-body")
@@ -270,12 +270,26 @@ function setLocal(c){
 }
 
 function handleCart(id){
-  let item = data.find((el) => el.id == id )
-  item.count = 1;
-  cart.push(item)
-  setLocal(cart)
 
+  if(login)
+    {
+      let item = data.find((el) => el.id == id )
+      item.count = 1;
+      cart.push(item)
+      setLocal(cart)
+
+    }
+else{
+    location.href="login.html"
+  }
 }
+
+function logout(){
+  sessionStorage.removeItem("login")
+  location.href="login.html"
+}
+
+
 
 function deleteCart(id){
   let item = cart.filter((el) => el.id != id )
