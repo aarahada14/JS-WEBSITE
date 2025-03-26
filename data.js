@@ -517,7 +517,10 @@ total.innerHTML = `
                     you save ${val} on this order  </span>` : ``
                   }
             </div>
-      </div>
+      </div>`
+
+  shopping.innerHTML=`
+                  <sapan class="position-absolute top-45 start-20 translate-middle badge rounded-pill bg-danger" style="font-size:10px">${cart.length}</span>
   `
  }
 
